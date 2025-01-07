@@ -1,7 +1,6 @@
 {
   "name": "logitech_assigment_ajay",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html",

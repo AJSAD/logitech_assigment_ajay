@@ -1,0 +1,33 @@
+name: build
+
+on:
+    push:
+        branches:
+            - release/*
+    pull_request:
+        branches:
+            - main
+            - release/*
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            # Step 1: Checkout the code
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            # Step 2: Set up Node.js environment
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "20.15.1"
+
+            # Step 3: Install dependencies
+            - name: Install dependencies
+              run: npm install
+
+            # Step 4: Run the build command to check for errors
+            - name: Run build
+              run: npm run build
