@@ -1,0 +1,1 @@
+export const MAX_ORDER_BOOK_ITEMS = 25;
