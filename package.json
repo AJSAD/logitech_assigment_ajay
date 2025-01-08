@@ -16,7 +16,14 @@
     "sass": "^1.83.1"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.5.0",
+    "@types/numeral": "^2.0.5",
+    "@types/react": "^19.0.3",
+    "@types/react-dom": "^19.0.2",
+    "numeral": "^2.0.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "ws": "^8.18.0"
   }
 }
