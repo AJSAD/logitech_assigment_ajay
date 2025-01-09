@@ -11,15 +11,22 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@parcel/transformer-sass": "^2.13.3",
     "parcel": "^2.13.3",
     "process": "^0.11.10",
     "sass": "^1.83.1"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.3.1",
+    "@mui/material": "^6.3.1",
     "@reduxjs/toolkit": "^2.5.0",
+    "@types/d3": "^7.4.3",
     "@types/numeral": "^2.0.5",
     "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
+    "d3": "^7.9.0",
+    "lodash": "^4.17.21",
     "numeral": "^2.0.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
