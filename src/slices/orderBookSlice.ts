@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { OrderBookState, UpdatePayload } from ".";
 
+const MAX_ORDER_ITEMS = 40;
+
 const initialState: OrderBookState = {
   bids: [],
   asks: [],
@@ -25,8 +27,9 @@ const orderBookSlice = createSlice({
         } else {
           state.bids.push({ price, amount, count });
         }
-        // Sort bids in descending order
+        // Trim to top 40 bids
         state.bids.sort((a, b) => b.price - a.price);
+        state.bids = state.bids.slice(0, MAX_ORDER_ITEMS);
       } else {
         // Update or add to asks
         const askIndex = state.asks.findIndex((ask) => ask.price === price);
@@ -35,8 +38,9 @@ const orderBookSlice = createSlice({
         } else {
           state.asks.push({ price, amount: Math.abs(amount), count });
         }
-        // Sort asks in ascending order
+        // Trim to top 40 asks
         state.asks.sort((a, b) => a.price - b.price);
+        state.asks = state.asks.slice(0, MAX_ORDER_ITEMS);
       }
     },
     resetOrderBook(state) {
