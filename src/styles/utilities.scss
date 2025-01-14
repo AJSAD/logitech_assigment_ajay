@@ -1,0 +1,51 @@
+$primary-bg-color: #172d3e;
+$text-color-primary: #f2f2f5;
+$text-color-secondary: rgba(242, 242, 245, 0.6);
+$border-color: rgba(100, 100, 100, 0.3);
+$icon-disabled-color: rgba(242, 242, 245, 0.2);
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.flex-center {
+    justify-content: center;
+}
+
+.flex-grow {
+    flex: 1;
+}
+
+.flex-space-between {
+    display: flex;
+    justify-content: space-between;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+.padding-horizontal {
+    padding: 0 5px;
+}
+
+.gap-small {
+    gap: 5px;
+}
+
+.icon-small {
+    width: 15px;
+    height: 17px;
+    color: $text-color-primary;
+}

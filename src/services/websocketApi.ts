@@ -1,98 +1,94 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../store/store";
+import { get } from "lodash";
 import { addChannel, removeChannel } from "../slices/channelsSlice";
-import { processUpdate, resetOrderBook } from "../slices/orderBookSlice";
+import { resetOrderBook, throttledUpdateAsks, throttledUpdateBids } from "../slices/orderBookSlice";
+import { RootState } from "../store/store";
 
+const worker = new Worker(new URL("../workers/websocketWorker.ts", import.meta.url));
+
+let isConnected = false;
+let pingInterval: number | null = null;
 let socket: WebSocket | null = null;
-let isConnected = false; // Track WebSocket connection status
-let pingInterval: number | null = null; // Ping interval reference
 
 export const websocketApi = createApi({
   reducerPath: "websocketApi",
   baseQuery: fakeBaseQuery(),
   endpoints: (builder) => ({
-    subscribe: builder.mutation<void, string>({
-      queryFn: (msg, api) => {
-        const getState = api.getState as () => RootState;
+    subscribe: builder.query({
+      queryFn: () => ({ data: null }),
+      
+      async onCacheEntryAdded(
+        msg: string,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch, getState }: any
+      ) {
+        if (!socket) {
+          socket = new WebSocket("wss://api-pub.bitfinex.com/ws/2");
 
-        if (!socket || socket.readyState !== WebSocket.OPEN) {
-          if (!isConnected) {
-            socket = new WebSocket("wss://api-pub.bitfinex.com/ws/2");
+          socket.onopen = () => {
+            console.log("WebSocket connected");
+            isConnected = true;
+            if (msg && socket) {
+              socket.send(msg);
+              console.log("Message sent:", msg);
+            }
 
-            socket.onopen = () => {
-              isConnected = true;
-              console.log("WebSocket connected");
-              socket?.send(msg);
-
-              // Start sending ping messages every 30 seconds
-              pingInterval = window.setInterval(() => {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                  socket.send(JSON.stringify({ event: "ping" }));
-                  console.log("Ping sent");
-                }
-              }, 30000);
-            };
-
-            socket.onmessage = (event) => {
-              const data = JSON.parse(event.data);
-
-              if (data.event === "subscribed") {
-                api.dispatch(addChannel(data));
-              } else if (data.event === "unsubscribed") {
-                api.dispatch(removeChannel(data.chanId));
-                api.dispatch(resetOrderBook());
-              } else if (Array.isArray(data)) {
-                const [chanId, updates] = data;
-                const channel = getState().channels[chanId];
-                if (channel && channel.channel === "book") {
-                  if (Array.isArray(updates)) {
-                    if (Array.isArray(updates[0])) {
-                      updates.forEach((update) => {
-                        if (Array.isArray(update) && update.length === 3) {
-                          api.dispatch(processUpdate(update));
-                        } else {
-                          console.error("Invalid update format:", update);
-                        }
-                      });
-                    } else if (updates.length === 3) {
-                      api.dispatch(processUpdate(updates));
-                    } else {
-                      console.error("Unexpected update format:", updates);
-                    }
-                  } else {
-                    console.error("Expected updates to be an array, but got:", updates);
-                  }
-                }
-              } else {
-                console.log("WebSocket message:", data);
+            pingInterval = window.setInterval(() => {
+              if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ event: "ping" }));
+                console.log("Ping sent");
               }
-            };
+            }, 30000);
+          };
 
-            socket.onerror = (error) => {
-              console.error("WebSocket error:", error);
-            };
+          socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            worker.postMessage({ type: "processMessage", payload: message });
+          };
 
-            socket.onclose = () => {
-              console.log("WebSocket connection closed");
-              isConnected = false;
+          socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+          };
 
-              // Clear the ping interval when socket closes
-              if (pingInterval !== null) {
-                clearInterval(pingInterval);
-                pingInterval = null;
-              }
-            };
-          } else {
-            socket.send(msg);
-          }
-        } else {
+          socket.onclose = () => {
+            console.log("WebSocket connection closed");
+            if (pingInterval !== null) {
+              clearInterval(pingInterval);
+              pingInterval = null;
+            }
+          };
+        }
+
+        if (isConnected && msg) {
           socket.send(msg);
         }
 
-        return { data: "WebSocket connection managed locally" };
+        worker.onmessage = (event: MessageEvent) => {
+          const { type, payload } = event.data;
+          const state: RootState = getState();
+          const throttle = get(state, "orderBookSettings.throttleSettings.throttle", 100);
+
+          if (type === "updateBids") {
+            throttledUpdateBids(payload, throttle)(dispatch);
+          } else if (type === "updateAsks") {
+            throttledUpdateAsks(payload, throttle)(dispatch);
+          } else if (type === "subscribed") {
+            dispatch(addChannel(payload));
+            dispatch(resetOrderBook());
+          } else if (type === "unsubscribed") {
+            dispatch(removeChannel(payload.chanId));
+          }
+        };
+
+        await cacheDataLoaded;
+        await cacheEntryRemoved;
+
+        socket?.close();
+        if (pingInterval !== null) {
+          clearInterval(pingInterval);
+        }
       },
     }),
   }),
 });
 
-export const { useSubscribeMutation } = websocketApi;
+export const { useSubscribeQuery } = websocketApi;

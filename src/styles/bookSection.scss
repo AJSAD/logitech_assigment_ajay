@@ -1,0 +1,16 @@
+@import "./utilities";
+
+.book-section {
+    @extend .flex-column;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    &.row-reverse {
+        margin-right: 0;
+    }
+
+    &.default {
+        margin-right: 1px;
+    }
+}
