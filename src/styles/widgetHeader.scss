@@ -1,0 +1,41 @@
+@import './utilities.scss';
+
+.widget-header {
+  @extend .flex-space-between;
+  @extend .flex-row;
+  margin: 0;
+  height: 32px;
+  line-height: 28px;
+  cursor: pointer;
+  user-select: none;
+  background-color: $primary-bg-color;
+  border-bottom: 2px solid $border-color;
+  @extend .padding-horizontal;
+  @extend .gap-small;
+}
+
+.widget-header-title {
+  @extend .text-bold;
+  @extend .text-uppercase;
+  font-size: 0.9rem;
+  line-height: 20px;
+  color: $text-color-primary;
+}
+
+.widget-header-subtitle {
+  @extend .text-bold;
+  font-size: 11px;
+  color: $text-color-secondary;
+}
+
+.widget-header-flex-grow {
+  @extend .flex-grow;
+}
+
+.widget-header-controls {
+  @extend .flex-row;
+
+  .widget-header-icon {
+    @extend .icon-small;
+  }
+}

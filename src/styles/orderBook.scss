@@ -1,0 +1,14 @@
+@import './utilities.scss';
+
+.order-book {
+    @extend .flex-column;
+    @extend .padding-horizontal;
+    background-color: $primary-bg-color;
+
+    &-container {
+        @extend .flex-row;
+        @extend .flex-center;
+        position: relative;
+        padding: 10px 5px;
+    }
+}
