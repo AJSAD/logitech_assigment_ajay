@@ -1,13 +1,13 @@
 import React from "react";
 import { Provider } from "react-redux";
-import OrderBook from "./containers/OrderBook";
+import AppDashboard from "./containers/AppDashboard";
 import store from "./store/store";
 import "./styles/index.scss";
 
 function App() {
 	return (
 		<Provider store={store}>
-			<OrderBook />
+			<AppDashboard />
 		</Provider>
 	);
 }

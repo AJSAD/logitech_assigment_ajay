@@ -6,12 +6,22 @@ const channelsSlice = createSlice({
   },
   reducers: {
     addChannel(state, action) {
-      const { chanId, ...channelData } = action.payload;
-      state[chanId] = channelData;
+      const { channel, ...channelData } = action.payload;
+      state[channel] = channelData;
     },
     removeChannel(state, action) {
       const chanId = action.payload;
-      delete state[chanId];
+      let channelKey;
+
+      Object.entries(state).forEach(([key, item]) => {
+        if (item.chanId === chanId) {
+          channelKey = key;
+        }
+      });
+
+      if (channelKey) {
+        delete state[channelKey];
+      }
     },
   },
 });
